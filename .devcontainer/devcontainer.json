@@ -1,0 +1,48 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
+// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/ubuntu-18.04-git
+{
+    "name": "zephyr dev",
+    "dockerFile": "Dockerfile",
+    
+    // paths in Dockerfile are relative to this, hence the parent folder
+    "context": "../",
+    
+    // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "user",
+
+    // The optional 'runArgs' property can be used to specify additional runtime arguments.
+    "runArgs": [
+        "-v", "/dev:/dev",  //
+        "--privileged"      // allows access to tty* devices
+    ],
+
+    "mounts": [
+    ],
+	
+    // make a list of ports inside the container available locally
+	"forwardPorts": [
+	],
+
+    // Configure tool-specific properties.
+    // https://code.visualstudio.com/docs/remote/devcontainerjson-reference#_vs-code-specific-properties
+    "customizations": {
+        // Configure properties specific to VS Code.
+        "vscode": {
+            "settings": {
+                // core
+                "terminal.integrated.defaultProfile.linux": "bash",
+            },
+            "extensions": [
+                // core
+                "ms-vscode.cmake-tools",
+                "ms-azuretools.vscode-docker",
+                // zephyr
+                "circuitdojo.zephyr-tools",
+                // editing
+                "stkb.rewrap",
+                "wayou.vscode-todo-highlight"
+            ]
+        }
+    } 
+
+}
