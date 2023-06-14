@@ -139,17 +139,11 @@ USER root
 
 
 
-
+ARG TARGET=stm32
 ARG TOOLCHAIN=arm-zephyr-eabi
 
 ARG ZEPHYR_VERSION=3.3.0
 ARG ZSDK_VERSION=0.16.1
-ARG DOXYGEN_VERSION=1.9.4
-ARG RENODE_VERSION=1.13.3
-ARG LLVM_VERSION=16
-ARG BSIM_VERSION=v2.1
-ARG SPARSE_VERSION=9212270048c3bd23f56c20a83d4f89b870b2b26e
-ARG PROTOC_VERSION=21.7
 ARG WGET_ARGS="-q --show-progress --progress=bar:force:noscroll"
 
 # Install Zephyr SDK (minimal + toolchain + host tools)
@@ -160,9 +154,9 @@ RUN mkdir -p /opt/toolchains && \
 	rm zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
 	# toolchain
 	cd zephyr-sdk-${ZSDK_VERSION} && \
-	wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.1/toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz && \
-    tar xvf toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz && \
-    rm toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz && \
+	wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.1/toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
+    tar xvf toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
+    rm toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
     # host tools
     wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.1/hosttools_linux-x86_64.tar.xz && \
     tar xvf hosttools_linux-x86_64.tar.xz && \
@@ -187,17 +181,14 @@ RUN sudo -E -- bash -c ' \
 	'
 
 WORKDIR /workdir
+RUN \
+	west init -m https://github.com/cooked/vscode-zephyr-template --mf .manifests/west-${TARGET}.yml && \
+    #west init -l manifest && \
+    west update && \
+    python3 -m pip install -r zephyr/scripts/requirements.txt
 
 RUN \
-    west init -m https://github.com/zephyrproject-rtos/zephyr --mr v${ZEPHYR_VERSION} && \
-    west update --narrow -o=--depth=1 && \
-    echo "Installing requirements: zephyr/scripts/requirements.txt" && \
-    python3 -m pip install -r zephyr/scripts/requirements.txt
-    #echo "Installing requirements: bootloader/mcuboot/scripts/requirements.txt" && \
-    #python3 -m pip install -r bootloader/mcuboot/scripts/requirements.txt
-
-RUN mkdir /workdir/project
-
+	mkdir /workdir/project
 WORKDIR /workdir/project
 
 

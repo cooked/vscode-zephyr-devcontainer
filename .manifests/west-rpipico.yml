@@ -17,5 +17,5 @@ manifest:
       import:
         name-allowlist:
           - cmsis
-          - hal_stm32
+          - hal_rpi_pico
           

@@ -13,15 +13,6 @@ on:
           - 'esp32'
           - 'iMX'
           - 'iMX8m'
-  # targets
-  #
-  # stm32: arm-zephyr-eabi
-  # esp32: 
-
-  #push:
-  #  branches: [ "master" ]
-  #pull_request:
-  #  branches: [ "master" ]
 
 jobs:
 

@@ -16,6 +16,4 @@ manifest:
       revision: v3.3.0
       import:
         name-allowlist:
-          - cmsis
-          - hal_stm32
-          
+          - hal_espressif
