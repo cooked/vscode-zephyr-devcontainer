@@ -2,6 +2,22 @@ name: Docker Image CI
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        description: 'Enter the target of development'
+        required: true
+        default: 'arm-'
+        options:
+          - 'ST STM32'
+          - 'Expressif ESP32'
+          - 'NXP iMX'
+          - 'NXP iMX8m'
+  # targets
+  #
+  # stm32: arm-zephyr-eabi
+  # esp32: 
+
   #push:
   #  branches: [ "master" ]
   #pull_request:
