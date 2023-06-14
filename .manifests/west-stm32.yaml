@@ -1,0 +1,20 @@
+
+# https://docs.zephyrproject.org/3.1.0/develop/west/manifest.html
+# https://github.com/zephyrproject-rtos/zephyr/issues/35075
+
+manifest:
+
+  remotes:
+    - name: zephyr
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      remote: zephyr
+      repo-path: zephyr
+      revision: v3.3.0
+      import:
+        name-allowlist:
+          - cmsis
+          - hal_stm32
+          
