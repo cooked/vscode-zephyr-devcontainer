@@ -7,12 +7,12 @@ on:
         type: choice
         description: 'Enter the target of development'
         required: true
-        default: 'arm-'
+        default: 'stm32'
         options:
-          - 'ST STM32'
-          - 'Expressif ESP32'
-          - 'NXP iMX'
-          - 'NXP iMX8m'
+          - 'stm32'
+          - 'esp32'
+          - 'iMX'
+          - 'iMX8m'
   # targets
   #
   # stm32: arm-zephyr-eabi
