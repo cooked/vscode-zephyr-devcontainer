@@ -1,144 +1,7 @@
-# CI Image (ci) 
-# -- only selected toolchains
-
-#FROM debian:11-slim
-FROM ubuntu:22.04
-
-ARG UID=1000
-ARG GID=1000
-
-# Set default shell during Docker image build to bash
-SHELL ["/bin/bash", "-c"]
-
-# Set non-interactive frontend for apt-get to skip any user confirmations
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install base packages
-RUN apt-get -y update && \
-	apt-get -y upgrade && \
-	apt-get install --no-install-recommends -y \
-		software-properties-common \
-		lsb-release \
-		autoconf \
-		automake \
-		bison \
-		build-essential \
-		ca-certificates \
-		cargo \
-		ccache \
-		chrpath \
-		cmake \
-		cpio \
-		device-tree-compiler \
-		dfu-util \
-		diffstat \
-		dos2unix \
-		doxygen \
-		file \
-		flex \
-		g++ \
-		gawk \
-		gcc \
-		gcovr \
-		git \
-		git-core \
-		gnupg \
-		gperf \
-		gtk-sharp2 \
-		help2man \
-		iproute2 \
-		lcov \
-		libcairo2-dev \
-		libglib2.0-dev \
-		libgtk2.0-0 \
-		liblocale-gettext-perl \
-		libncurses5-dev \
-		libpcap-dev \
-		libpopt0 \
-		libsdl1.2-dev \
-		libsdl2-dev \
-		libssl-dev \
-		libtool \
-		libtool-bin \
-		locales \
-		make \
-		net-tools \
-		ninja-build \
-		openssh-client \
-		parallel \
-		pkg-config \
-		python3-dev \
-		python3-pip \
-		python3-ply \
-		python3-setuptools \
-		python-is-python3 \
-		qemu \
-		rsync \
-		socat \
-		srecord \
-		sudo \
-		texinfo \
-		unzip \
-		valgrind \
-		wget \
-		ovmf \
-		xz-utils \
-		thrift-compiler
-
-# Install multi-lib gcc (x86 only)
-RUN if [ "${HOSTTYPE}" = "x86_64" ]; then \
-	apt-get install --no-install-recommends -y \
-		gcc-multilib \
-		g++-multilib \
-	; fi
-
-# Install i386 packages (x86 only)
-RUN if [ "${HOSTTYPE}" = "x86_64" ]; then \
-	dpkg --add-architecture i386 && \
-	apt-get -y update && \
-	apt-get -y upgrade && \
-	apt-get install --no-install-recommends -y \
-		libsdl2-dev:i386 \
-	; fi
-
-# Initialise system locale
-RUN locale-gen en_US.UTF-8
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
-
-# Install Python dependencies
-RUN python3 -m pip install -U --no-cache-dir pip && \
-	pip3 install -U --no-cache-dir wheel setuptools && \
-	pip3 install --no-cache-dir pygobject && \
-	pip3 install --no-cache-dir \
-		-r https://raw.githubusercontent.com/zephyrproject-rtos/zephyr/main/scripts/requirements.txt \
-		-r https://raw.githubusercontent.com/zephyrproject-rtos/mcuboot/main/scripts/requirements.txt \
-		GitPython imgtool junitparser numpy protobuf PyGithub \
-		pylint sh statistics west && \
-	pip3 check
-
-# Clean up stale packages
-RUN apt-get clean -y && \
-	apt-get autoremove --purge -y && \
-	rm -rf /var/lib/apt/lists/*
-
-# Create 'user' account
-RUN groupadd -g $GID -o user
-
-RUN useradd -u $UID -m -g user -G plugdev user \
-	&& echo 'user ALL = NOPASSWD: ALL' > /etc/sudoers.d/user \
-	&& chmod 0440 /etc/sudoers.d/user
-
-USER root
-
-
-
+FROM ghcr.io/zephyrproject-rtos/ci-base:main
 
 ### second stage
-
-
-
+ARG WORKDIR=workspaces
 ARG TARGET=stm32
 ARG TOOLCHAIN=arm-zephyr-eabi
 
@@ -164,12 +27,6 @@ RUN mkdir -p /opt/toolchains && \
     # run it
     #./zephyr-sdk-${HOSTTYPE}-hosttools-standalone-0.9.sh
 
-
-# Clean up stale packages
-RUN apt-get clean -y && \
-	apt-get autoremove --purge -y && \
-	rm -rf /var/lib/apt/lists/*
-
 # Run the Zephyr SDK setup script as 'user' in order to ensure that the
 # `Zephyr-sdk` CMake package is located in the package registry under the
 # user's home directory.
@@ -180,17 +37,12 @@ RUN sudo -E -- bash -c ' \
 	chown -R user:user /home/user/.cmake \
 	'
 
-WORKDIR /workdir
+WORKDIR /${WORKDIR}
 RUN \
 	west init -m https://github.com/cooked/vscode-zephyr-template --mf .manifests/west-${TARGET}.yml && \
     #west init -l manifest && \
     west update && \
     python3 -m pip install -r zephyr/scripts/requirements.txt
-
-RUN \
-	mkdir /workdir/project
-WORKDIR /workdir/project
-
 
 # Set the locale
 ENV PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
@@ -198,8 +50,8 @@ ENV OVMF_FD_PATH=/usr/share/ovmf/OVMF.fd
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
-ENV XDG_CACHE_HOME=/workdir/.cache
+ENV XDG_CACHE_HOME=/${WORKDIR}/.cache
 ENV ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-ENV ZEPHYR_SDK_INSTALL_DIR=/workdir/zephyr-sdk
-ENV ZEPHYR_BASE=/workdir/zephyr
+ENV ZEPHYR_SDK_INSTALL_DIR=/${WORKDIR}/zephyr-sdk
+ENV ZEPHYR_BASE=/${WORKDIR}/zephyr
 ENV PATH="${ZEPHYR_BASE}/scripts:${PATH}"

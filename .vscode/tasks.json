@@ -13,7 +13,7 @@
 				"build",
 				"-p", "always",
 				"-b", "nucleo_f446ze",
-				"/workdir/zephyr/samples/basic/blinky"
+				"/workspaces/zephyr/samples/basic/blinky"
 			]
 		},
 
