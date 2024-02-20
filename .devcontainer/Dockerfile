@@ -1,12 +1,12 @@
 FROM ghcr.io/zephyrproject-rtos/ci-base:main
 
-### second stage
-ARG WORKDIR=workspaces
-ARG TARGET=stm32
-ARG TOOLCHAIN=arm-zephyr-eabi
+ARG WORKDIR 
+ARG TARGET
+ARG TOOLCHAIN
 
-ARG ZEPHYR_VERSION=3.3.0
-ARG ZSDK_VERSION=0.16.1
+ARG ZEPHYR_VERSION
+ARG ZSDK_VERSION
+
 ARG WGET_ARGS="-q --show-progress --progress=bar:force:noscroll"
 
 # Install Zephyr SDK (minimal + toolchain + host tools)

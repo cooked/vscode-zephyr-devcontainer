@@ -16,6 +16,16 @@
         "--privileged"      // allows access to tty* devices
     ],
 
+    "build": {
+        "args": {
+            "WORKDIR" : "workspaces",
+            "TARGET" : "stm32",
+            "TOOLCHAIN" : "arm-zephyr-eabi",
+            "ZSDK_VERSION" : "0.16.1",
+            "ZEPHYR_VERSION" : "3.3.0"
+        }
+    },
+
     "mounts": [
     ],
 	
