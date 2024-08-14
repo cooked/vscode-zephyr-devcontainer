@@ -5,14 +5,14 @@
 	"tasks": [
 
 		{
-			"label": "Build test",
+			"label": "Build sample",
 			"type": "shell",
 			"group": "build",
 			"command": "west",
 			"args": [
 				"build",
 				"-p", "always",
-				"-b", "nucleo_f446ze",
+				"-b", "nucleo_f103rb",
 				"/workspaces/zephyr/samples/basic/blinky"
 			]
 		},
