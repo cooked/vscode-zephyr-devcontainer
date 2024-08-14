@@ -21,12 +21,18 @@
             "WORKDIR" : "workspaces",
             "TARGET" : "stm32",
             "TOOLCHAIN" : "arm-zephyr-eabi",
-            "ZSDK_VERSION" : "0.16.1",
-            "ZEPHYR_VERSION" : "3.3.0"
+            
+            // TODO: not currently used... but taken from the west manifest 
+            //"ZEPHYR_VERSION" : "main",
+
+            // select a version compatible with the Zephyr version above
+            "ZSDK_VERSION" : "0.16.8"
         }
     },
 
-    "mounts": [
+    // see https://code.visualstudio.com/remote/advancedcontainers/add-local-file-mount
+	"mounts": [
+        //"source=/Users/stefano/research-zephyr,target=/workspaces/research-zephyr,type=bind,consistency=cached"
     ],
 	
     // make a list of ports inside the container available locally
