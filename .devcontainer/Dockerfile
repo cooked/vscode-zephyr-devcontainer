@@ -17,11 +17,11 @@ RUN mkdir -p /opt/toolchains && \
 	rm zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
 	# toolchain
 	cd zephyr-sdk-${ZSDK_VERSION} && \
-	wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.1/toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
+	wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
     tar xvf toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
     rm toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
     # host tools
-    wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.1/hosttools_linux-x86_64.tar.xz && \
+    wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/hosttools_linux-x86_64.tar.xz && \
     tar xvf hosttools_linux-x86_64.tar.xz && \
     rm hosttools_linux-x86_64.tar.xz
     # run it
