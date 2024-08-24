@@ -3,8 +3,6 @@ FROM ghcr.io/zephyrproject-rtos/ci-base:main
 ARG WORKDIR 
 ARG TARGET
 ARG TOOLCHAIN
-
-ARG ZEPHYR_VERSION
 ARG ZSDK_VERSION
 
 ARG WGET_ARGS="-q --show-progress --progress=bar:force:noscroll"

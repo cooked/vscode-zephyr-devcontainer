@@ -16,6 +16,7 @@
         "--privileged"      // allows access to tty* devices
     ],
 
+    // pass args to the Dockerfile
     "build": {
         "args": {
             "WORKDIR" : "workspaces",
