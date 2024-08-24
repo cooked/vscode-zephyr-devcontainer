@@ -15,17 +15,13 @@ RUN mkdir -p /opt/toolchains && \
 	wget ${WGET_ARGS} https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
 	tar xf zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
 	rm zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
-	# toolchain
+    # toolchain
 	cd zephyr-sdk-${ZSDK_VERSION} && \
 	wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
     tar xvf toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
     rm toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
-    # host tools
-    wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/hosttools_linux-x86_64.tar.xz && \
-    tar xvf hosttools_linux-x86_64.tar.xz && \
-    rm hosttools_linux-x86_64.tar.xz
-    # run it
-    #./zephyr-sdk-${HOSTTYPE}-hosttools-standalone-0.9.sh
+    # install host tools
+    ./zephyr-sdk-${HOSTTYPE}-hosttools-standalone-0.9.sh
 
 # Run the Zephyr SDK setup script as 'user' in order to ensure that the
 # `Zephyr-sdk` CMake package is located in the package registry under the
@@ -55,3 +51,4 @@ ENV ZEPHYR_TOOLCHAIN_VARIANT=zephyr
 ENV ZEPHYR_SDK_INSTALL_DIR=/${WORKDIR}/zephyr-sdk
 ENV ZEPHYR_BASE=/${WORKDIR}/zephyr
 ENV PATH="${ZEPHYR_BASE}/scripts:${PATH}"
+ENV PATH="/opt/zephyr-sdk/0.9/sysroots/x86_64-pokysdk-linux/usr/bin:${PATH}"

@@ -5,6 +5,21 @@
 	"tasks": [
 
 		{
+			"label": "Build (configurable)",
+			"type": "shell",
+			"group": "build",
+			"command": "west",
+			"args": [
+				"build",
+				"-p", "${input:pristine}",
+				"-b", "${input:board}",
+				"${input:proj}"
+			],
+			"problemMatcher": [
+				"$gcc"
+			]
+		},
+		{
 			"label": "Build sample",
 			"type": "shell",
 			"group": "build",
@@ -38,5 +53,36 @@
 			],
 		},
 
+	],
+	"inputs": [
+		{
+			"id": "board",
+			"type": "pickString",
+			"description": "See https://docs.zephyrproject.org/latest/boards/index.html",
+			"default": "nucleo_f103rb",
+			"options": [
+				"nucleo_f103rb",
+			]
+		},
+		{
+			"id": "pristine",
+			"type": "pickString",
+			"description": "Choose when to run a pristine build",
+			"default": "auto",
+			"options": [
+				"auto",
+				"always",
+				"never"
+			]
+		},
+		{
+			"id": "proj",
+			"type": "pickString",
+			"description": "Choose what project to build",
+			"default": "/workspaces/zephyr/samples/basic/blinky",
+			"options": [
+				"/workspaces/zephyr/samples/basic/blinky"	// nucleo_f103rb
+			]
+		}
 	]
 }
