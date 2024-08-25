@@ -29,7 +29,7 @@
 
     // see https://code.visualstudio.com/remote/advancedcontainers/add-local-file-mount
 	"mounts": [
-       //"source=/Users/stefano/research-zephyr,target=/workspaces/research-zephyr,type=bind,consistency=cached"
+       //"source=${env:HOME}/research-zephyr,target=/workspaces/research-zephyr,type=bind,consistency=cached"
     ],
 	
     // make a list of ports inside the container available locally

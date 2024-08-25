@@ -7,6 +7,9 @@ ARG ZSDK_VERSION
 
 ARG WGET_ARGS="-q --show-progress --progress=bar:force:noscroll"
 
+# Install udev
+RUN apt-get -y update && apt-get -y install udev
+
 # Install Zephyr SDK (minimal + toolchain + host tools)
 RUN mkdir -p /opt/toolchains && \
 	cd /opt/toolchains && \
@@ -20,6 +23,13 @@ RUN mkdir -p /opt/toolchains && \
     rm toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
     # install host tools
     ./zephyr-sdk-${HOSTTYPE}-hosttools-standalone-0.9.sh
+	
+# Hack udev to run inside a container
+# https://stackoverflow.com/questions/62060604/why-udev-init-script-default-disable-container-support-while-in-fact-it-works
+RUN sed -i.bak -e '/if \[ ! -w \/sys \]/,+3 s/^/#/' /etc/init.d/udev
+
+# Install OpenOCD udev rules
+RUN cp /opt/zephyr-sdk/0.9/sysroots/x86_64-pokysdk-linux/usr/share/openocd/contrib/60-openocd.rules /lib/udev/rules.d/60-openocd.rules
 
 # Run the Zephyr SDK setup script as 'user' in order to ensure that the
 # `Zephyr-sdk` CMake package is located in the package registry under the
