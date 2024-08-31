@@ -54,6 +54,9 @@
     "customizations": {
         // Configure properties specific to VS Code.
         "vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux" : "bash"
+			},
             "extensions": [
                 // core
                 "ms-vscode.cpptools-extension-pack", // incl. cpptools, cpptools-theme, cmake, cmake tools,
