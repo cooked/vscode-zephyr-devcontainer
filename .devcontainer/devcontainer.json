@@ -3,7 +3,22 @@
 {
     "name": "vscode-zephyr",
 
-	"image" : "ghcr.io/cooked/vscode-zephyr:stm32",
+	
+	// build with Dockerfile and args
+    "dockerFile": "Dockerfile",
+	// paths in Dockerfile are relative to this, hence the parent folder
+    "context": "../",
+    "build": {
+        "args": {
+            "TARGET" : "stm32",
+            "TOOLCHAIN" : "arm-zephyr-eabi",
+            "ZSDK_VERSION" : "0.16.8",
+			"WEST_MANIFEST" : ".manifests/west-stm32.yml"
+        }
+    },
+    // see https://aka.ms/vscode-remote/containers/non-root.
+    //"remoteUser": "user", 
+
 
     // The optional 'runArgs' property can be used to specify additional runtime arguments.
     "runArgs": [
