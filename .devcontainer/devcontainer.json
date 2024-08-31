@@ -55,7 +55,8 @@
         // Configure properties specific to VS Code.
         "vscode": {
 			"settings": {
-				"terminal.integrated.defaultProfile.linux" : "bash"
+				"terminal.integrated.defaultProfile.linux" : "bash",
+				"extensions.ignoreRecommendations": true
 			},
             "extensions": [
                 // core
