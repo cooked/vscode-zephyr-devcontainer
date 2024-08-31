@@ -19,18 +19,6 @@ ENV ZEPHYR_TOOLCHAIN_VARIANT=zephyr
 ENV ZEPHYR_SDK_VERSION=${ZSDK_VERSION}
 ENV ZEPHYR_SDK=${ZEPHYR_SDK_DIR}/zephyr-sdk-${ZSDK_VERSION}
 
-# replace user (herited from base image)
-# TODO: add conditional to keep user if user is user
-
-#RUN deluser user
-#RUN useradd -m $USERNAME -G plugdev && \
-#	echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME && \
-#	chmod 0440 /etc/sudoers.d/$USERNAME
-#RUN mkdir /home/${USERNAME}/workspace && \
-#	chown -R $USERNAME:$USERNAME /home/${USERNAME}/workspace
-#RUN cp /home/user/{.profile,.bashrc} /home/${USERNAME} && \
-#	rm -r /home/user
-
 # Install udev and git
 RUN apt-get -y update && \
 	apt-get -y install udev git

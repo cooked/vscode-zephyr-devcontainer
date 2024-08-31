@@ -1,17 +1,9 @@
 // For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
 // https://github.com/microsoft/vscode-dev-containers/tree/master/containers/ubuntu-18.04-git
 {
-    "name": "zephyr dev",
-    "dockerFile": "Dockerfile",
-    
-    // paths in Dockerfile are relative to this, hence the parent folder
-    "context": "../",
-    
-    // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-    "remoteUser": "${env:USER}", 
+    "name": "vscode-zephyr",
 
-	// https://stackoverflow.com/questions/76248945/vs-code-devcontainer-workspace-ownership-and-permission
-	//"containerUser": "{env:USER}",
+	"image" : "ghcr.io/cooked/vscode-zephyr:stm32",
 
     // The optional 'runArgs' property can be used to specify additional runtime arguments.
     "runArgs": [
@@ -19,30 +11,14 @@
         "--privileged"      // allows access to tty* devices
     ],
 
-    // Pass args to the Dockerfile
-    // - Zephyr SDK specified here
-    // - Zephyr itself gets selected by the west manifest
-    "build": {
-        "args": {
-			"USERNAME" : "${env:USER}",
-            "TARGET" : "stm32",
-            "TOOLCHAIN" : "arm-zephyr-eabi",
-            "ZSDK_VERSION" : "0.16.8",
-			"WEST_MANIFEST" : ".manifests/west-stm32.yml"
-        }
-    },
-
     // https://code.visualstudio.com/remote/advancedcontainers/change-default-source-mount
-    "workspaceMount": "source=${localWorkspaceFolder},target=/home/${env:USER}/workspace,type=bind",
-    "workspaceFolder": "/home/${env:USER}/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/user/workspace,type=bind",
+    "workspaceFolder": "/home/user/workspace",
 
     // see https://code.visualstudio.com/remote/advancedcontainers/add-local-file-mount
-	// mount your app, boards, drivers, etc... 
-	// from the host to a subfolder of this workspace in the container
+	// mount local folder that are external to the workspace
 	"mounts": [
-		"source=${env:HOME}/research-zephyr/boards,target=${containerWorkspaceFolder}/boards,type=bind,consistency=cached",
-       	"source=${env:HOME}/research-zephyr/samples,target=${containerWorkspaceFolder}/samples,type=bind,consistency=cached",
-		"source=${env:HOME}/research-zephyr/drivers,target=${containerWorkspaceFolder}/drivers,type=bind,consistency=cached"
+		//"source=${env:HOME}/research-zephyr/boards,target=${containerWorkspaceFolder}/boards,type=bind,consistency=cached",
     ],
 
     // make a list of ports inside the container available locally
@@ -52,7 +28,6 @@
     // Configure tool-specific properties.
     // https://code.visualstudio.com/docs/remote/devcontainerjson-reference#_vs-code-specific-properties
     "customizations": {
-        // Configure properties specific to VS Code.
         "vscode": {
 			"settings": {
 				"terminal.integrated.defaultProfile.linux" : "bash",
