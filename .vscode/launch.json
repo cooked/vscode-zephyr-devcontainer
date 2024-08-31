@@ -1,0 +1,52 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Debug (OpenOCD)",
+            "request": "launch",
+            "type": "cortex-debug",
+
+            "cwd": "${workspaceFolder}",
+            "executable": "build/zephyr/zephyr.elf",
+            // TODO: get this dynamic from the zephyr build folder?
+            // or different approach entirely
+			// https://marketplace.visualstudio.com/items?itemName=mcu-debug.peripheral-viewer
+            "svdPath": "${env:SVD_DIR}/STM32G0B1.svd",
+            //"device": "stm32f103xx",
+
+            //"servertype": "stutil",
+            /*"preLaunchCommands": [
+                "connect under reset",
+            ],
+            "serverArgs":[
+                "--connect-under-reset"
+            ],*/
+
+            "servertype": "openocd",
+            "searchDir": [
+                "${env:ZEPHYR_SDK}/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts/board"
+            ],
+            "configFiles": [
+                //"st_nucleo_f103rb.cfg"
+				"st_nucleo_g0.cfg"
+            ],
+            "preLaunchCommands": [
+                "monitor reset",
+            ],
+			
+			// simple, already on PATH
+            "gdbPath": "arm-zephyr-eabi-gdb",
+
+            "runToEntryPoint": "main",
+            /*"postRestartCommands": [
+                "break main",
+                "continue"
+            ],*/
+
+            //"preLaunchTask": "West Build"
+
+            //"showDevDebugOutput": "raw"
+        },
+    ]
+}

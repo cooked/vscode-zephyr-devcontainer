@@ -3,5 +3,21 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+
+		// we already installed what we need
+		// https://stackoverflow.com/questions/57664187/how-do-i-turn-off-the-extension-recommendations-notification
+		"extensions.ignoreRecommendations": true,
+
+        // core
+        "terminal.integrated.defaultProfile.linux": "bash",
+		"cortex-debug.variableUseNaturalFormat": false,
+
+		"files.associations": {
+			"kernel.h": "c",
+			"gpio.h": "c",
+			"stdio.h": "c"
+		}
+	}
 }

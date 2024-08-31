@@ -1,62 +1,96 @@
+# https://github.com/zephyrproject-rtos/docker-image/tree/main
+
 FROM ghcr.io/zephyrproject-rtos/ci-base:main
 
-ARG WORKDIR 
-ARG TARGET
-ARG TOOLCHAIN
-ARG ZSDK_VERSION
-
+# Args from devcontainer.json (local build) or GitHub workflow (CI) (or default)
+ARG TARGET="stm32"
+ARG TOOLCHAIN="arm-zephyr-eabi"
+ARG ZSDK_VERSION="0.16.8"
 ARG WGET_ARGS="-q --show-progress --progress=bar:force:noscroll"
+ARG WEST_MANIFEST=".manifests/west-${TARGET}.yml"
+ARG ZEPHYR_SDK_DIR="/opt"
+ARG USERNAME="user"
 
-# Install udev
-RUN apt-get -y update && apt-get -y install udev
+ENV PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
+ENV OVMF_FD_PATH=/usr/share/ovmf/OVMF.fd
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+ENV ZEPHYR_TOOLCHAIN_VARIANT=zephyr
+ENV ZEPHYR_SDK_VERSION=${ZSDK_VERSION}
+ENV ZEPHYR_SDK=${ZEPHYR_SDK_DIR}/zephyr-sdk-${ZSDK_VERSION}
 
-# Install Zephyr SDK (minimal + toolchain + host tools)
-RUN mkdir -p /opt/toolchains && \
-	cd /opt/toolchains && \
-	wget ${WGET_ARGS} https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
-	tar xf zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
-	rm zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
-    # toolchain
-	cd zephyr-sdk-${ZSDK_VERSION} && \
-	wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
-    tar xvf toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
-    rm toolchain_linux-x86_64_${TOOLCHAIN}.tar.xz && \
-    # install host tools
-    ./zephyr-sdk-${HOSTTYPE}-hosttools-standalone-0.9.sh
-	
+# replace user (herited from base image)
+# TODO: add conditional to keep user if user is user
+RUN deluser user
+RUN useradd -m $USERNAME -G plugdev && \
+	echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME && \
+	chmod 0440 /etc/sudoers.d/$USERNAME
+RUN mkdir /home/${USERNAME}/workspace && \
+	chown -R $USERNAME:$USERNAME /home/${USERNAME}/workspace
+RUN cp /home/user/{.profile,.bashrc} /home/${USERNAME} && \
+	rm -r /home/user
+
+# Install udev and git
+RUN apt-get -y update && \
+	apt-get -y install udev git
+
+# (optional) Install the st-util GDB server
+# https://manpages.ubuntu.com/manpages/focal/en/man1/st-util.1.html
+# TODO: make it conditional based on TARGET
+RUN apt-get -y install stlink-tools
+
 # Hack udev to run inside a container
 # https://stackoverflow.com/questions/62060604/why-udev-init-script-default-disable-container-support-while-in-fact-it-works
 RUN sed -i.bak -e '/if \[ ! -w \/sys \]/,+3 s/^/#/' /etc/init.d/udev
 
-# Install OpenOCD udev rules
-RUN cp /opt/zephyr-sdk/0.9/sysroots/x86_64-pokysdk-linux/usr/share/openocd/contrib/60-openocd.rules /lib/udev/rules.d/60-openocd.rules
+
+
+# install minimal Zephyr SDK
+WORKDIR "${ZEPHYR_SDK_DIR}"
+RUN wget ${WGET_ARGS} https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
+	tar xf zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz && \
+	rm zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}_minimal.tar.xz
+
+# install toolchain and host tools
+# install OpenOCD udev rules
+# https://docs.zephyrproject.org/latest/develop/toolchains/zephyr_sdk.html	
+WORKDIR "${ZEPHYR_SDK}"
+RUN ./setup.sh -t ${TOOLCHAIN} -h && \
+	cp ./sysroots/x86_64-pokysdk-linux/usr/share/openocd/contrib/60-openocd.rules /lib/udev/rules.d/60-openocd.rules
+
 
 # Run the Zephyr SDK setup script as 'user' in order to ensure that the
 # `Zephyr-sdk` CMake package is located in the package registry under the
 # user's home directory.
-USER user
+USER $USERNAME
+WORKDIR /home/$USERNAME
 
 RUN sudo -E -- bash -c ' \
-	/opt/toolchains/zephyr-sdk-${ZSDK_VERSION}/setup.sh -c && \
-	chown -R user:user /home/user/.cmake \
-	'
+	${ZEPHYR_SDK}/setup.sh -c && \
+	chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.cmake'
 
-WORKDIR /${WORKDIR}
-RUN \
-	west init -m https://github.com/cooked/vscode-zephyr-template --mf .manifests/west-${TARGET}.yml && \
-    #west init -l manifest && \
-    west update && \
+# test local manifest
+RUN mkdir .manifest
+COPY ${WEST_MANIFEST} .manifest/west.yml
+
+RUN west init -l .manifest && \
+	west update && \
     python3 -m pip install -r zephyr/scripts/requirements.txt
+# TODO: drop requirements.txt.... already from the base image?
 
-# Set the locale
-ENV PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
-ENV OVMF_FD_PATH=/usr/share/ovmf/OVMF.fd
+# Install minimal SVD files
+# https://stackoverflow.com/a/52269934
+# TODO: make it dynamic based on TARGET
+RUN git clone -n --depth=1 --filter=tree:0 https://github.com/cmsis-svd/cmsis-svd-data.git && \
+	cd cmsis-svd-data && \
+	git sparse-checkout set --no-cone data/STMicro && \
+	git checkout
+ENV SVD_DIR=/home/${USERNAME}/cmsis-svd-data/data/STMicro
 
-ENV LC_ALL=C.UTF-8
-ENV LANG=C.UTF-8
-ENV XDG_CACHE_HOME=/${WORKDIR}/.cache
-ENV ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-ENV ZEPHYR_SDK_INSTALL_DIR=/${WORKDIR}/zephyr-sdk
-ENV ZEPHYR_BASE=/${WORKDIR}/zephyr
-ENV PATH="${ZEPHYR_BASE}/scripts:${PATH}"
-ENV PATH="/opt/zephyr-sdk/0.9/sysroots/x86_64-pokysdk-linux/usr/bin:${PATH}"
+ENV XDG_CACHE_HOME=/home/${USERNAME}/.cache
+#ENV ZEPHYR_BASE=${HOME}/zephyr
+#ENV PATH="${ZEPHYR_BASE}/scripts:${PATH}"
+# add openocd to PATH
+ENV PATH="${ZEPHYR_SDK}/sysroots/x86_64-pokysdk-linux/usr/bin:${PATH}"
+# add toolchain to PATH
+ENV PATH="${ZEPHYR_SDK}/${TOOLCHAIN}/bin:${PATH}"

@@ -8,7 +8,10 @@
     "context": "../",
     
     // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-    "remoteUser": "user",
+    "remoteUser": "${env:USER}", 
+
+	// https://stackoverflow.com/questions/76248945/vs-code-devcontainer-workspace-ownership-and-permission
+	//"containerUser": "{env:USER}",
 
     // The optional 'runArgs' property can be used to specify additional runtime arguments.
     "runArgs": [
@@ -16,22 +19,32 @@
         "--privileged"      // allows access to tty* devices
     ],
 
-    // pass args to the Dockerfile
+    // Pass args to the Dockerfile
+    // - Zephyr SDK specified here
+    // - Zephyr itself gets selected by the west manifest
     "build": {
         "args": {
-            "WORKDIR" : "workspaces",
+			"USERNAME" : "${env:USER}",
             "TARGET" : "stm32",
             "TOOLCHAIN" : "arm-zephyr-eabi",
-            "ZSDK_VERSION" : "0.16.8"
-            // NOTE: Zephyr version gets selected by the west manifest
+            "ZSDK_VERSION" : "0.16.8",
+			"WEST_MANIFEST" : ".manifests/west-stm32.yml"
         }
     },
 
+    // https://code.visualstudio.com/remote/advancedcontainers/change-default-source-mount
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/${env:USER}/workspace,type=bind",
+    "workspaceFolder": "/home/${env:USER}/workspace",
+
     // see https://code.visualstudio.com/remote/advancedcontainers/add-local-file-mount
+	// mount your app, boards, drivers, etc... 
+	// from the host to a subfolder of this workspace in the container
 	"mounts": [
-       //"source=${env:HOME}/research-zephyr,target=/workspaces/research-zephyr,type=bind,consistency=cached"
+		"source=${env:HOME}/research-zephyr/boards,target=${containerWorkspaceFolder}/boards,type=bind,consistency=cached",
+       	"source=${env:HOME}/research-zephyr/samples,target=${containerWorkspaceFolder}/samples,type=bind,consistency=cached",
+		"source=${env:HOME}/research-zephyr/drivers,target=${containerWorkspaceFolder}/drivers,type=bind,consistency=cached"
     ],
-	
+
     // make a list of ports inside the container available locally
 	"forwardPorts": [
 	],
@@ -41,10 +54,6 @@
     "customizations": {
         // Configure properties specific to VS Code.
         "vscode": {
-            "settings": {
-                // core
-                "terminal.integrated.defaultProfile.linux": "bash",
-            },
             "extensions": [
                 // core
                 "ms-vscode.cpptools-extension-pack", // incl. cpptools, cpptools-theme, cmake, cmake tools,
