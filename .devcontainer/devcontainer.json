@@ -1,12 +1,11 @@
-// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
-// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/ubuntu-18.04-git
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json
 {
     "name": "vscode-zephyr",
 
-	
+
 	// build with Dockerfile and args
+	// see also https://aka.ms/vscode-remote/containers/non-root.
     "dockerFile": "Dockerfile",
-	// paths in Dockerfile are relative to this, hence the parent folder
     "context": "../",
     "build": {
         "args": {
@@ -16,7 +15,6 @@
 			"WEST_MANIFEST" : ".manifests/west-stm32.yml"
         }
     },
-    // see https://aka.ms/vscode-remote/containers/non-root.
     //"remoteUser": "user", 
 
 
