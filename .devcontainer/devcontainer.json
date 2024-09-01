@@ -3,7 +3,7 @@
 {
     "name": "vscode-zephyr",
 
-	"image" : "ghcr.io/cooked/vscode-zephyr:stm32",
+	"image" : "ghcr.io/cooked/vscode-zephyr-devcontainer-stm32",
 
     // The optional 'runArgs' property can be used to specify additional runtime arguments.
     "runArgs": [
