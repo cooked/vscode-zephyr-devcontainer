@@ -77,7 +77,7 @@ jobs:
           #tags: ${{ steps.meta.outputs.tags }}
           #labels: ${{ steps.meta.outputs.labels }}
           #tags: type=ref
-          tags: ${{ env.IMAGE_NAME }}-${{ matrix.target }}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.target }}:latest
       
       # This step generates an artifact attestation for the image, which is an 
       # unforgeable statement about where and how it was built. It increases 
