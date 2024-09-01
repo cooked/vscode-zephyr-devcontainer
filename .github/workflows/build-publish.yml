@@ -4,18 +4,21 @@ name: Create and publish a Docker image
 on:
   workflow_dispatch:
     inputs:
-      target:
-        type: choice
-        description: 'Enter the target of development'
-        required: true
-        default: 'stm32'
-        options:
-          - 'stm32'
-          - 'esp32'
-          - 'iMX'
-          - 'iMX8m'
+      toolchain:
+        type: string
+        description: 'Toolchain identifier'
+        default: 'arm-zephyr-eabi'
+      sdk-version:
+        type: string
+        description: 'Zephyr SDK version'
+        default: '0.16.8'
+      west-manifest:
+        type: string
+        description: 'Path to the West manifest file'
+        default: '.manifests/west-stm32.yml'
+
 #  push:
-#    branches: ['release']
+#    branches: ['master']
 
 env:
   REGISTRY: ghcr.io
@@ -23,16 +26,22 @@ env:
 
 jobs:
   build-and-push-image:
+    strategy:
+        matrix:
+          target: ['stm32']
+
     runs-on: ubuntu-latest
-    # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
+    # Sets `GITHUB_TOKEN`  permissions for the actions in this job.
     permissions:
       contents: read
       packages: write
       attestations: write
       id-token: write
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
       # Uses the `docker/login-action` action to log in to the Container 
       # registry registry using the account and password that will publish the 
       # packages. Once published, the packages are scoped to the account 
@@ -43,6 +52,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       # This step uses [docker/metadata-action](https://github.com/docker/metadata-action#about) 
       # to extract tags and labels that will be applied to the specified image. 
       # The `id` "meta" allows the output of this step to be referenced in a subsequent step. 
@@ -52,6 +62,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
       # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
       # It uses the `context` parameter to define the build's context as the set of files located in the specified path. For more information, see "[Usage](https://github.com/docker/build-push-action#usage)" in the README of the `docker/build-push-action` repository.
       # It uses the `tags` and `labels` parameters to tag and label the image with the output from the "meta" step.
@@ -62,8 +73,12 @@ jobs:
           file: .devcontainer/Dockerfile
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          #push: ${{ github.event_name == 'workspace_dispatch' }}
+          #tags: ${{ steps.meta.outputs.tags }}
+          #labels: ${{ steps.meta.outputs.labels }}
+          #tags: type=ref
+          tags: ${{ github.actor }}/${{ env.IMAGE_NAME }}-${{ matrix.target }}:latest
+      
       # This step generates an artifact attestation for the image, which is an 
       # unforgeable statement about where and how it was built. It increases 
       # supply chain security for people who consume the image.  
