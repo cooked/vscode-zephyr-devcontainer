@@ -3,15 +3,16 @@
         {
             "name": "Zephyr",
 			
-			"compileCommands": "${workspaceFolder}/build/compile_commands.json",
-            "includePath": [
+			"configurationProvider": "nordic-semiconductor.nrf-connect",
+
+			//"compileCommands": "${workspaceFolder}/build/compile_commands.json",
+            /*"includePath": [
                 "${workspaceFolder}/**",
                 "${userHome}/zephyr/include/**",
 				//"${userHome}/zephyr/arch/arm/include/**"
                 //"${workspaceFolder}/build/zephyr/include/generated",
                 //"/opt/zephyr-sdk-0.16.8/arm-zephyr-eabi/arm-zephyr-eabi/include"
-            ],
-			
+            ],*/
 			/*
 			"includePath": [
                 "${workspaceFolder}/zephyr/arch/arm/include",
@@ -27,11 +28,10 @@
                 "${workspaceFolder}/zephyr/subsys/net/lib/tls_credentials/."
             ],
 			*/
-
-            "forcedInclude": [
+            /*"forcedInclude": [
                 "${workspaceFolder}/build/zephyr/include/generated/zephyr/devicetree_generated.h",
                 "${workspaceFolder}/.vscode/c_cpp_undef.h"
-            ],
+            ],*/
             /*"defines": [
                 "KERNEL",
                 "_FORTIFY_SOURCE=2",
@@ -41,7 +41,7 @@
             "compilerPath": "${env:ZEPHYR_SDK}/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-gcc-arm",
+            /*"intelliSenseMode": "linux-gcc-arm",
             "browse": {
                 "path": [
                     "${env:ZEPHYR_SDK}/arm-zephyr-eabi/arm-zephyr-eabi/include/*",
@@ -49,7 +49,7 @@
                     "${workspaceFolder}/*"
                 ],
                 "limitSymbolsToIncludedHeaders": true
-            }
+            }*/
         }
     ],
     "version": 4

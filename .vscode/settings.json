@@ -2,8 +2,8 @@
 	"git.enabled": true,
 	"git.autofetch": false,
 
-	"kconfig.zephyr.base": "${workspaceFolder}/zephyr",
-	
+	"kconfig.zephyr.base": "${userHome}/zephyr",
+
 	"cmake.configureOnOpen": false,
 
 	// The number of spaces a tab is equal to. This setting is overridden
@@ -76,5 +76,5 @@
 		"**/.west/**": true
 	},
 	"editor.renderControlCharacters": false,
-	
+
 }

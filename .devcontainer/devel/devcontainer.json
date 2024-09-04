@@ -2,11 +2,21 @@
 {
     "name": "vscode-zephyr",
 
-	// build from GitHub container registry package
-	// https://github.com/cooked?tab=packages&repo_name=vscode-zephyr-devcontainer
-	"image" : "ghcr.io/cooked/vscode-zephyr-devcontainer-stm32",
 
+	// build with Dockerfile and args
+	// see also https://aka.ms/vscode-remote/containers/non-root.
+    "dockerFile": "Dockerfile",
+    "context": "../",
+    "build": {
+        "args": {
+            "TARGET" : "stm32",
+            "TOOLCHAIN" : "arm-zephyr-eabi",
+            "ZSDK_VERSION" : "0.16.8",
+			"WEST_MANIFEST" : ".manifests/west-stm32.yml"
+        }
+    },
     //"remoteUser": "user", 
+
 
     // The optional 'runArgs' property can be used to specify additional runtime arguments.
     "runArgs": [
@@ -43,7 +53,7 @@
 				// zephyr
 				// extpack incl: devicetree, kconfig, link map, cmake
 				"nordic-semiconductor.nrf-connect",
-				"nordic-semiconductor.nrf-connect-extension-pack",
+				"nordic-semiconductor.nrf-connect-extension-pack", // 
                 // debug
                 "mcu-debug.debug-tracker-vscode", // needed by cortex-debug
                 "marus25.cortex-debug",
@@ -52,7 +62,7 @@
                 "stkb.rewrap",
                 "wayou.vscode-todo-highlight",
                 // task utils
-			    "augustocdias.tasks-shell-input" // needed by dynamic task input
+			    "augustocdias.tasks-shell-input" // MANDATORY for dynamic task input
             ]
         }
     } 

@@ -22,16 +22,26 @@ ENV ZEPHYR_SDK=${ZEPHYR_SDK_DIR}/zephyr-sdk-${ZSDK_VERSION}
 # Install udev and git
 RUN apt-get -y update && \
 	apt-get -y install udev git
-
-# (optional) Install the st-util GDB server
-# https://manpages.ubuntu.com/manpages/focal/en/man1/st-util.1.html
-# TODO: make it conditional based on TARGET
-RUN apt-get -y install stlink-tools
-
+	
 # Hack udev to run inside a container
 # https://stackoverflow.com/questions/62060604/why-udev-init-script-default-disable-container-support-while-in-fact-it-works
 RUN sed -i.bak -e '/if \[ ! -w \/sys \]/,+3 s/^/#/' /etc/init.d/udev
 
+# Install Jlink
+RUN apt-get -y install libxkbcommon-x11-0 \
+	libxcb-image0 \
+	libxcb-keysyms1 \
+	libxcb-icccm4 \
+	libxcb-shape0 \
+	libxcb-render-util0
+RUN wget --post-data "accept_license_agreement=accepted" https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.deb && \
+	dpkg -i ./JLink_Linux_x86_64.deb && \
+	rm ./JLink_Linux_x86_64.deb
+
+# Install the st-util GDB server
+# https://manpages.ubuntu.com/manpages/focal/en/man1/st-util.1.html
+# TODO: make it conditional based on TARGET
+RUN apt-get -y install stlink-tools
 
 
 # install minimal Zephyr SDK
@@ -60,7 +70,7 @@ RUN sudo -E -- bash -c ' \
 
 # test local manifest
 RUN mkdir .manifest
-COPY ${WEST_MANIFEST} .manifest/west.yml
+COPY --chown=${USERNAME} ${WEST_MANIFEST} .manifest/west.yml
 
 RUN west init -l .manifest && \
 	west update && \
@@ -76,9 +86,10 @@ RUN git clone -n --depth=1 --filter=tree:0 https://github.com/cmsis-svd/cmsis-sv
 	git checkout
 ENV SVD_DIR=/home/${USERNAME}/cmsis-svd-data/data/STMicro
 
+
 ENV XDG_CACHE_HOME=/home/${USERNAME}/.cache
-#ENV ZEPHYR_BASE=${HOME}/zephyr
-#ENV PATH="${ZEPHYR_BASE}/scripts:${PATH}"
+ENV ZEPHYR_BASE=/home/${USERNAME}/zephyr
+ENV PATH="${ZEPHYR_BASE}/scripts:${PATH}"
 # add openocd to PATH
 ENV PATH="${ZEPHYR_SDK}/sysroots/x86_64-pokysdk-linux/usr/bin:${PATH}"
 # add toolchain to PATH
