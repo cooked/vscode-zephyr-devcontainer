@@ -46,16 +46,19 @@
 		},
 
 		// FLASH
-		{
-			"label": "Flash sample",
-			"type": "shell",
+        {
+			"label": "Flash (force JLink)",
+			"type": "nrf-connect-flash",
 			"group": "build",
-			"command": "west",
-			"args": [
-				"flash",
-				"-r", "openocd"
-			],
+			"runner": "jlink"
 		},
+		{
+			"label": "Flash (force OpenOCD)",
+			"type": "nrf-connect-flash",
+			"group": "build",
+			"runner": "openocd",
+		},
+        
 		// DEBUG
 		{
 			"label": "Debug sample",

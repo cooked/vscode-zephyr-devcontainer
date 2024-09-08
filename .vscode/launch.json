@@ -3,7 +3,35 @@
     "configurations": [
 
         {
-            "name": "Debug (OpenOCD)",
+            "name": "Debug (force JLink)",
+            "request": "launch",
+            "type": "cortex-debug",
+        
+            "cwd": "${workspaceFolder}",
+            "executable": "samples/test-pwm-generator/build_1/zephyr/zephyr.elf",
+            // TODO: get this dynamic from the zephyr build folder?
+            // or different approach entirely
+			// https://marketplace.visualstudio.com/items?itemName=mcu-debug.peripheral-viewer
+            "svdPath": "${env:SVD_DIR}/STM32G0B1.svd",
+
+            "servertype": "jlink",
+            "serverpath": "/opt/SEGGER/JLink/JLinkGDBServerCLExe",
+            "serverArgs": [],
+            // https://www.segger.com/supported-devices/
+            "device": "STM32G0B1RE",
+
+            "preLaunchCommands": [
+                "monitor reset",
+            ],
+			
+			// simple, already on PATH
+            "gdbPath": "arm-zephyr-eabi-gdb",
+
+            "runToEntryPoint": "main",
+        },
+
+        {
+            "name": "Debug (force OpenOCD)",
             "request": "launch",
             "type": "cortex-debug",
 
