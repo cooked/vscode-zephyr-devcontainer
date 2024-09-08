@@ -2,9 +2,10 @@
 	"git.enabled": true,
 	"git.autofetch": false,
 
-	"kconfig.zephyr.base": "${userHome}/zephyr",
+	//"kconfig.zephyr.base": "${userHome}/zephyr",
+    //"devicetree.zephyr": "${userHome}/zephyr",
 
-	"cmake.configureOnOpen": false,
+	//"cmake.configureOnOpen": false,
 
 	// The number of spaces a tab is equal to. This setting is overridden
 	// based on the file contents when `editor.detectIndentation` is true.
@@ -19,8 +20,9 @@
 	"editor.formatOnSave": false,
 	"editor.codeActionsOnSave": [],
 	"editor.renderWhitespace": "all",
+    "editor.renderControlCharacters": false,
 
-	"files.watcherExclude": {
+    "files.watcherExclude": {
 		"**/.git/objects/**": true,
 		"**/.git/subtree-cache/**": true,
 		"**/node_modules/**": true,
@@ -75,6 +77,4 @@
 		"**/log/**": true,
 		"**/.west/**": true
 	},
-	"editor.renderControlCharacters": false,
-
 }

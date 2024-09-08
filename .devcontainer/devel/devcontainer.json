@@ -2,11 +2,10 @@
 {
     "name": "vscode-zephyr",
 
-
 	// build with Dockerfile and args
 	// see also https://aka.ms/vscode-remote/containers/non-root.
-    "dockerFile": "Dockerfile",
-    "context": "../",
+    "dockerFile": "../Dockerfile",
+    "context": "../../",
     "build": {
         "args": {
             "TARGET" : "stm32",
@@ -15,8 +14,8 @@
 			"WEST_MANIFEST" : ".manifests/west-stm32.yml"
         }
     },
-    //"remoteUser": "user", 
 
+    //"remoteUser": "user", 
 
     // The optional 'runArgs' property can be used to specify additional runtime arguments.
     "runArgs": [
@@ -31,8 +30,7 @@
     // see https://code.visualstudio.com/remote/advancedcontainers/add-local-file-mount
 	// mount local folder that are external to the workspace
 	"mounts": [
-		"source=${env:HOME}/research-zephyr/app-sigma,target=${containerWorkspaceFolder}/app,type=bind,consistency=cached",
-		"source=${env:HOME}/research-zephyr/samples,target=${containerWorkspaceFolder}/samples,type=bind,consistency=cached",
+	    "source=${env:HOME}/research-zephyr/samples,target=${containerWorkspaceFolder}/samples,type=bind,consistency=cached"
     ],
 
     // make a list of ports inside the container available locally
@@ -52,8 +50,10 @@
 				"ms-vscode.cpptools",
 				// zephyr
 				// extpack incl: devicetree, kconfig, link map, cmake
-				"nordic-semiconductor.nrf-connect",
-				"nordic-semiconductor.nrf-connect-extension-pack", // 
+                // NOTE: later versions are broken
+				"nordic-semiconductor.nrf-connect@2024.3.25",
+                "nordic-semiconductor.nrf-devicetree@2024.6.20",
+				"nordic-semiconductor.nrf-connect-extension-pack", 
                 // debug
                 "mcu-debug.debug-tracker-vscode", // needed by cortex-debug
                 "marus25.cortex-debug",

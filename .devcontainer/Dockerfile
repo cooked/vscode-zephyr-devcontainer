@@ -27,8 +27,14 @@ RUN apt-get -y update && \
 # https://stackoverflow.com/questions/62060604/why-udev-init-script-default-disable-container-support-while-in-fact-it-works
 RUN sed -i.bak -e '/if \[ ! -w \/sys \]/,+3 s/^/#/' /etc/init.d/udev
 
+# Install the st-util GDB server
+# https://manpages.ubuntu.com/manpages/focal/en/man1/st-util.1.html
+# TODO: make it conditional based on TARGET
+RUN apt-get -y install stlink-tools
+
 # Install Jlink
-RUN apt-get -y install libxkbcommon-x11-0 \
+RUN apt-get -y install \
+    libxkbcommon-x11-0 \
 	libxcb-image0 \
 	libxcb-keysyms1 \
 	libxcb-icccm4 \
@@ -38,11 +44,13 @@ RUN wget --post-data "accept_license_agreement=accepted" https://www.segger.com/
 	dpkg -i ./JLink_Linux_x86_64.deb && \
 	rm ./JLink_Linux_x86_64.deb
 
-# Install the st-util GDB server
-# https://manpages.ubuntu.com/manpages/focal/en/man1/st-util.1.html
-# TODO: make it conditional based on TARGET
-RUN apt-get -y install stlink-tools
-
+# needed for Nordic boards
+#RUN wget https://github.com/NordicSemiconductor/nrf-udev/releases/download/v1.0.1/nrf-udev_1.0.1-all.deb -O nrf-udev.deb && \
+#    dpkg -i nrf-udev.deb && \
+#    rm ./nrf-udev.deb
+#RUN wget https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-command-line-tools/sw/versions-10-x-x/10-24-2/nrf-command-line-tools_10.24.2_amd64.deb -O nrf-tools.deb && \
+#    dpkg -i nrf-tools.deb && \
+#    rm ./nrf-tools.deb
 
 # install minimal Zephyr SDK
 WORKDIR "${ZEPHYR_SDK_DIR}"
