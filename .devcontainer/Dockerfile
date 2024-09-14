@@ -33,6 +33,7 @@ RUN sed -i.bak -e '/if \[ ! -w \/sys \]/,+3 s/^/#/' /etc/init.d/udev
 RUN apt-get -y install stlink-tools
 
 # Install Jlink
+# https://github.com/ScoopInstaller/Scoop/issues/4336#issue-864466149
 RUN apt-get -y install \
     libxkbcommon-x11-0 \
 	libxcb-image0 \
