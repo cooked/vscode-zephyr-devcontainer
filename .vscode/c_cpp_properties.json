@@ -38,7 +38,7 @@
                 "__ZEPHYR__=1"
             ],*/
 
-            "compilerPath": "${env:ZEPHYR_SDK}/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc",
+            "compilerPath": "${env:ZEPHYR_SDK}/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             /*"intelliSenseMode": "linux-gcc-arm",

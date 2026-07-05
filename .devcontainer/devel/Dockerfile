@@ -1,13 +1,18 @@
 # https://github.com/zephyrproject-rtos/docker-image/tree/main
 
-FROM ghcr.io/zephyrproject-rtos/ci-base:main
+#FROM ghcr.io/zephyrproject-rtos/ci-base:main
+# For zephyr 3.7 use v0.26 branch
+FROM ghcr.io/zephyrproject-rtos/ci-base:v0.26.18 
 
-# Args from devcontainer.json (local build) or GitHub workflow (CI) (or default)
+
+# Explicit ARGs and their defaults. Defaults get overwritten by 
+# devcontainer.json (local build) or GitHub workflow (CI)
 ARG TARGET="stm32"
 ARG TOOLCHAIN="arm-zephyr-eabi"
-ARG ZSDK_VERSION="0.16.8"
+ARG ZSDK_VERSION="1.0.1"
+ARG ZEPHYR_VERSION="v4.4.0"
+ARG ZEPHYR_ALLOW_LIST="cmsis, hal_stm32"
 ARG WGET_ARGS="-q --show-progress --progress=bar:force:noscroll"
-ARG WEST_MANIFEST=".manifests/west-${TARGET}.yml"
 ARG ZEPHYR_SDK_DIR="/opt"
 ARG USERNAME="user"
 
@@ -21,18 +26,26 @@ ENV ZEPHYR_SDK=${ZEPHYR_SDK_DIR}/zephyr-sdk-${ZSDK_VERSION}
 
 # Install udev and git
 RUN apt-get -y update && \
-	apt-get -y install udev git
-	
+	apt-get -y install --no-install-recommends \
+        udev \
+        libmagic1
+
 # Hack udev to run inside a container
 # https://stackoverflow.com/questions/62060604/why-udev-init-script-default-disable-container-support-while-in-fact-it-works
 RUN sed -i.bak -e '/if \[ ! -w \/sys \]/,+3 s/^/#/' /etc/init.d/udev
+
+# udev rules (for Nordic boards)
+RUN apt-get -y install libunistring2
+RUN wget https://github.com/NordicSemiconductor/nrf-udev/releases/download/v1.0.1/nrf-udev_1.0.1-all.deb -O nrf-udev.deb && \
+    dpkg -i nrf-udev.deb && \
+    rm ./nrf-udev.deb
 
 # Install the st-util GDB server
 # https://manpages.ubuntu.com/manpages/focal/en/man1/st-util.1.html
 # TODO: make it conditional based on TARGET
 RUN apt-get -y install stlink-tools
 
-# Install Jlink
+# Jlink
 # https://github.com/ScoopInstaller/Scoop/issues/4336#issue-864466149
 RUN apt-get -y install \
     libxkbcommon-x11-0 \
@@ -45,13 +58,11 @@ RUN wget --post-data "accept_license_agreement=accepted" https://www.segger.com/
 	dpkg -i ./JLink_Linux_x86_64.deb && \
 	rm ./JLink_Linux_x86_64.deb
 
-# needed for Nordic boards
-#RUN wget https://github.com/NordicSemiconductor/nrf-udev/releases/download/v1.0.1/nrf-udev_1.0.1-all.deb -O nrf-udev.deb && \
-#    dpkg -i nrf-udev.deb && \
-#    rm ./nrf-udev.deb
-#RUN wget https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-command-line-tools/sw/versions-10-x-x/10-24-2/nrf-command-line-tools_10.24.2_amd64.deb -O nrf-tools.deb && \
-#    dpkg -i nrf-tools.deb && \
-#    rm ./nrf-tools.deb
+# nrf Util
+RUN wget https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -O nrfutil && \
+    chmod +x nrfutil && \
+    mv nrfutil /usr/bin
+
 
 # install minimal Zephyr SDK
 WORKDIR "${ZEPHYR_SDK_DIR}"
@@ -64,8 +75,8 @@ RUN wget ${WGET_ARGS} https://github.com/zephyrproject-rtos/sdk-ng/releases/down
 # https://docs.zephyrproject.org/latest/develop/toolchains/zephyr_sdk.html	
 WORKDIR "${ZEPHYR_SDK}"
 RUN ./setup.sh -t ${TOOLCHAIN} -h && \
-	cp ./sysroots/x86_64-pokysdk-linux/usr/share/openocd/contrib/60-openocd.rules /lib/udev/rules.d/60-openocd.rules
-
+    mkdir -p /lib/udev/rules.d && \
+    cp $(find . -name 60-openocd.rules | head -n 1) /lib/udev/rules.d/
 
 # Run the Zephyr SDK setup script as 'user' in order to ensure that the
 # `Zephyr-sdk` CMake package is located in the package registry under the
@@ -77,14 +88,34 @@ RUN sudo -E -- bash -c ' \
 	${ZEPHYR_SDK}/setup.sh -c && \
 	chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.cmake'
 
-# test local manifest
-RUN mkdir .manifest
-COPY --chown=${USERNAME} ${WEST_MANIFEST} .manifest/west.yml
+# Define a hidden staging directory outside the bind-mount path
+ENV STAGE_DIR=/home/${USERNAME}/.stage
+RUN mkdir -p ${STAGE_DIR}
+WORKDIR ${STAGE_DIR}
 
+# Generate the west.yml manifest dynamically inside the staging directory
+RUN mkdir .manifest && \
+    echo "manifest:" > .manifest/west.yml && \
+    echo "  projects:" >> .manifest/west.yml && \
+    echo "    - name: zephyr" >> .manifest/west.yml && \
+    echo "      url: https://github.com/zephyrproject-rtos/zephyr" >> .manifest/west.yml && \
+    echo "      revision: ${ZEPHYR_VERSION}" >> .manifest/west.yml && \
+    echo "      west-commands: scripts/west-commands.yml" >> .manifest/west.yml && \
+    echo "      import:" >> .manifest/west.yml && \
+    echo "        name-allowlist:" >> .manifest/west.yml && \
+    echo "${ZEPHYR_ALLOW_LIST}" | tr ',' '\n' | sed 's/ //g' | while read -r module; do \
+        if [ ! -z "$module" ]; then \
+            echo "          - $module" >> .manifest/west.yml; \
+        fi; \
+    done && \
+    echo "  self:" >> .manifest/west.yml && \
+    echo "    path: .manifest" >> .manifest/west.yml
+
+# Initialize and pull all code into the staging directory during image build
 RUN west init -l .manifest && \
-	west update && \
-    python3 -m pip install -r zephyr/scripts/requirements.txt
-# TODO: drop requirements.txt.... already from the base image?
+    west update
+
+WORKDIR /home/$USERNAME
 
 # Install minimal SVD files
 # https://stackoverflow.com/a/52269934
@@ -103,3 +134,6 @@ ENV PATH="${ZEPHYR_BASE}/scripts:${PATH}"
 ENV PATH="${ZEPHYR_SDK}/sysroots/x86_64-pokysdk-linux/usr/bin:${PATH}"
 # add toolchain to PATH
 ENV PATH="${ZEPHYR_SDK}/${TOOLCHAIN}/bin:${PATH}"
+
+# Set the final default working directory back to your active workspace
+WORKDIR /home/${USERNAME}/workspace

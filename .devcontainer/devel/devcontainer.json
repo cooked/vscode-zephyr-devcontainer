@@ -4,16 +4,20 @@
 
 	// build with Dockerfile and args
 	// see also https://aka.ms/vscode-remote/containers/non-root.
-    "dockerFile": "../Dockerfile",
+    "dockerFile": "Dockerfile",
     "context": "../../",
     "build": {
         "args": {
             "TARGET" : "stm32",
             "TOOLCHAIN" : "arm-zephyr-eabi",
-            "ZSDK_VERSION" : "0.16.8",
-			"WEST_MANIFEST" : ".manifests/west-stm32.yml"
+            "ZSDK_VERSION" : "1.0.1",
+            "ZEPHYR_VERSION": "v4.4.0",
+            "ZEPHYR_ALLOW_LIST": "cmsis, hal_stm32"
         }
     },
+
+    // Trigger the script immediately after the container starts and mounts the volume
+    "postStartCommand": "if [ ! -d .west ]; then echo 'Copying pre-built Zephyr environment...'; cp -r /home/user/.stage/. .; fi",
 
     //"remoteUser": "user", 
 
@@ -51,9 +55,13 @@
 				// zephyr
 				// extpack incl: devicetree, kconfig, link map, cmake
                 // NOTE: later versions are broken
-				"nordic-semiconductor.nrf-connect@2024.3.25",
-                "nordic-semiconductor.nrf-devicetree@2024.6.20",
-				"nordic-semiconductor.nrf-connect-extension-pack", 
+				//"nordic-semiconductor.nrf-connect",//@2024.3.25",
+                //"nordic-semiconductor.nrf-devicetree",//@2024.6.20",
+				//"nordic-semiconductor.nrf-connect-extension-pack", 
+                "nordic-semiconductor.nrf-connect",
+                "nordic-semiconductor.nrf-devicetree",
+				"nordic-semiconductor.nrf-connect-extension-pack",
+                "mylonics.zephyr-ide",
                 // debug
                 "mcu-debug.debug-tracker-vscode", // needed by cortex-debug
                 "marus25.cortex-debug",
